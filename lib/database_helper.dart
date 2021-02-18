@@ -1,8 +1,9 @@
+import 'dart:io';
+
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
-import 'package:path/path.dart';
 
 class DatabaseHelper {
   static final _databaseName = "leading_sys.db";
@@ -56,9 +57,15 @@ class DatabaseHelper {
         id INTEGER PRIMARY KEY,
         name TEXT NOT NULL,
         lat REAL,
-        lng REAL
+        lng REAL,
+        order_index INTEGER
       )
     ''');
+    await insert('Target', {
+      'name': 'test Target',
+      'lat': '45.363',
+      'lng': '64.558',
+    });
     print('after Target ');
     await _database.execute('''
       CREATE TABLE My_location (
@@ -70,9 +77,15 @@ class DatabaseHelper {
         deg_start REAL,
         deg_end REAL,
         dis_start REAL,
-        dis_end REAL
+        dis_end REAL,
+        order_index INTEGER
       )
     ''');
+    await insert('My_location', {
+      'name': 'test My_location',
+      'lat': '55.363',
+      'lng': '77.558',
+    });
     await _database.execute('''
       CREATE TABLE W_type (
         id INTEGER PRIMARY KEY, 
@@ -105,8 +118,12 @@ class DatabaseHelper {
   // a key-value list of columns.
   Future<List<Map<String, dynamic>>> queryAllRows(tableName) async {
     Database db = await instance.database;
-    //return await db.query(table);
-    return await db.query(tableName, orderBy: 'order_index ASC');
+    var temp = await db.query(tableName, orderBy: 'order_index ASC');
+    if (temp == null) {
+      await Future.delayed(Duration(milliseconds: 200));
+      temp = await db.query(tableName, orderBy: 'order_index ASC');
+    }
+    return temp;
   }
 
   // All of the methods (insert, query, update, delete) can also be done using

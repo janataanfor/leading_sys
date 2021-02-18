@@ -1,14 +1,13 @@
 import 'package:desktop_test_app/componants/searchBox.dart';
 import 'package:desktop_test_app/model/ourLocations.dart';
-import 'package:desktop_test_app/model/target.dart';
 import 'package:desktop_test_app/pages/OurLocationDetails.dart';
-import 'package:desktop_test_app/pages/TargetDetails.dart';
 import 'package:desktop_test_app/utility/debouncer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
-import '../database_helper.dart';
 import 'package:vs_scrollbar/vs_scrollbar.dart';
+
+import '../database_helper.dart';
 
 class OurLocationsScreen extends StatefulWidget {
   @override
@@ -25,7 +24,7 @@ class _OurLocationsScreen extends State<OurLocationsScreen> {
   bool waiting = false;
   bool showSpinner = false;
   bool showMessage = false;
-  String message;
+  String message = '';
   final _formKey = GlobalKey<FormState>();
   ScrollController _scrollController = ScrollController();
 
@@ -40,9 +39,11 @@ class _OurLocationsScreen extends State<OurLocationsScreen> {
   }
 
   void hideMessage() async {
-    await Future.delayed(Duration(seconds: 3));
-    setState(() {
-      showMessage = false;
+    await Future.delayed(Duration(seconds: 3), () {
+      if (!mounted) return;
+      setState(() {
+        showMessage = false;
+      });
     });
   }
 
@@ -154,199 +155,114 @@ class _OurLocationsScreen extends State<OurLocationsScreen> {
     } else {
       return Expanded(
         child: VsScrollbar(
-            controller: _scrollController,
-            scrollDirection: Axis.vertical, // @REQUIRED
-            allowDrag:
-                true, // allows to scroll the list using scrollbar [default : true]
-            color: Color(0xFFE1E5E9), // sets color of vsScrollBar
-            radius: 50, // sets radius of vsScrollBar
-            thickness: 8, // sets thickness of vsScrollBar
-            isAlwaysShown: false, // default false
-            // sets scrollbar fade animation duration [ Default : Duration(milliseconds: 300)]
-            scrollbarFadeDuration: Duration(milliseconds: 500),
-            // Fades scrollbar after certain duration [ Default : Duration(milliseconds: 600)]
-            scrollbarTimeToFade: Duration(milliseconds: 800),
-            child: ReorderableListView(
-              onReorder: (oldIndex, newIndex) {
-                setState(() {
-                  _updateItems(oldIndex, newIndex);
-                });
-              },
-              children: [
-                for (final item in filteredOurLocations)
-                  Container(
-                    key: ValueKey(item),
-                    height: 130,
-                    child: Card(
-                      elevation: 0,
-                      margin: EdgeInsets.only(top: 12),
-                      shape: RoundedRectangleBorder(
-                          side: BorderSide(
-                            color: Color(0xFFE1E5E9),
-                            width: 1.0,
-                          ),
-                          borderRadius:
-                              BorderRadius.all(Radius.circular(16.0))),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(16),
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => OurLocationDetails(
-                                        ourLocation: item,
-                                      ))).then((value) => updateView());
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 30, vertical: 15),
-                          child: Column(
-                            children: [
-                              Row(
+          controller: _scrollController,
+          scrollDirection: Axis.vertical, // @REQUIRED
+          allowDrag:
+              true, // allows to scroll the list using scrollbar [default : true]
+          color: Color(0xFFE1E5E9), // sets color of vsScrollBar
+          radius: 50, // sets radius of vsScrollBar
+          thickness: 8, // sets thickness of vsScrollBar
+          isAlwaysShown: false, // default false
+          // sets scrollbar fade animation duration [ Default : Duration(milliseconds: 300)]
+          scrollbarFadeDuration: Duration(milliseconds: 500),
+          // Fades scrollbar after certain duration [ Default : Duration(milliseconds: 600)]
+          scrollbarTimeToFade: Duration(milliseconds: 800),
+          child: filteredOurLocations.length == 0
+              ? Text('No Data!')
+              : ReorderableListView(
+                  scrollController: _scrollController,
+                  padding: EdgeInsets.only(bottom: 20, right: 20),
+                  onReorder: (oldIndex, newIndex) {
+                    setState(() {
+                      _updateItems(oldIndex, newIndex);
+                    });
+                  },
+                  children: [
+                    for (final item in filteredOurLocations)
+                      Container(
+                        key: ValueKey(item),
+                        height: 130,
+                        child: Card(
+                          elevation: 0,
+                          margin: EdgeInsets.only(top: 12),
+                          shape: RoundedRectangleBorder(
+                              side: BorderSide(
+                                color: Color(0xFFE1E5E9),
+                                width: 1.0,
+                              ),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(16.0))),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(16),
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => OurLocationDetails(
+                                            ourLocation: item,
+                                          ))).then((value) => updateView());
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 30, vertical: 15),
+                              child: Column(
                                 children: [
-                                  Text(
-                                    item.name,
-                                    style: TextStyle(
-                                        fontSize: 20,
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.w500),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        item.name,
+                                        style: TextStyle(
+                                            fontSize: 20,
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.w500),
+                                      ),
+                                      Text(
+                                        item.orderIndex.toString(),
+                                        style: TextStyle(
+                                            fontSize: 20,
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.w500),
+                                      )
+                                    ],
                                   ),
-                                  Text(
-                                    item.orderIndex.toString(),
-                                    style: TextStyle(
-                                        fontSize: 20,
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.w500),
+                                  Row(
+                                    children: [
+                                      Container(
+                                        width: 150,
+                                        child: TextField(
+                                          decoration: InputDecoration(
+                                              labelText: 'Lat',
+                                              border: InputBorder.none),
+                                          readOnly: true,
+                                          controller: TextEditingController(
+                                              text: item.lat.toString()),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 20,
+                                      ),
+                                      Container(
+                                        width: 150,
+                                        child: TextField(
+                                          decoration: InputDecoration(
+                                              labelText: 'Lng',
+                                              border: InputBorder.none),
+                                          readOnly: true,
+                                          controller: TextEditingController(
+                                              text: item.lng.toString()),
+                                        ),
+                                      ),
+                                    ],
                                   )
                                 ],
                               ),
-                              Row(
-                                children: [
-                                  Container(
-                                    width: 150,
-                                    child: TextField(
-                                      decoration: InputDecoration(
-                                          labelText: 'Lat',
-                                          border: InputBorder.none),
-                                      readOnly: true,
-                                      controller: TextEditingController(
-                                          text: item.lat.toString()),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 20,
-                                  ),
-                                  Container(
-                                    width: 150,
-                                    child: TextField(
-                                      decoration: InputDecoration(
-                                          labelText: 'Lng',
-                                          border: InputBorder.none),
-                                      readOnly: true,
-                                      controller: TextEditingController(
-                                          text: item.lng.toString()),
-                                    ),
-                                  ),
-                                ],
-                              )
-                            ],
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                  )
-              ],
-            )
-
-            // ListView.builder(
-            //   controller: _scrollController,
-            //   padding: EdgeInsets.only(bottom: 20, right: 20),
-            //   itemCount: filteredOurLocations.length,
-            //   itemBuilder: (context, index) {
-            //     return Card(
-            //       elevation: 0,
-            //       margin: EdgeInsets.only(top: 12),
-            //       shape: RoundedRectangleBorder(
-            //           side: BorderSide(
-            //             color: Color(0xFFE1E5E9),
-            //             width: 1.0,
-            //           ),
-            //           borderRadius: BorderRadius.all(Radius.circular(16.0))),
-            //       child: InkWell(
-            //         borderRadius: BorderRadius.circular(16),
-            //         onTap: () {
-            //           Navigator.push(
-            //               context,
-            //               MaterialPageRoute(
-            //                   builder: (context) => OurLocationDetails(
-            //                         ourLocation: filteredOurLocations[index],
-            //                       ))).then((value) => updateView());
-            //         },
-            //         child: Padding(
-            //           padding: const EdgeInsets.symmetric(
-            //               horizontal: 30, vertical: 15),
-            //           child: Column(
-            //             children: [
-            //               Row(
-            //                 children: [
-            //                   // ClipRRect(
-            //                   //   borderRadius: BorderRadius.circular(12),
-            //                   //   child: SvgPicture.network(
-            //                   //     filteredCategories[index].imageUrl,
-            //                   //     fit: BoxFit.cover,
-            //                   //     width: 56,
-            //                   //     height: 56,
-            //                   //   ),
-            //                   // ),
-            //                   //SizedBox(width: 16),
-            //                   Text(
-            //                     filteredOurLocations[index].name,
-            //                     style: TextStyle(
-            //                         fontSize: 20,
-            //                         color: Colors.black,
-            //                         fontWeight: FontWeight.w500),
-            //                   )
-            //                 ],
-            //               ),
-            //               Row(
-            //                 children: [
-            //                   Container(
-            //                     width: 150,
-            //                     child: TextField(
-            //                       decoration: InputDecoration(
-            //                           labelText: 'Lat', border: InputBorder.none),
-            //                       readOnly: true,
-            //                       controller: TextEditingController(
-            //                           text: filteredOurLocations[index]
-            //                               .lat
-            //                               .toString()),
-            //                     ),
-            //                   ),
-            //                   SizedBox(
-            //                     width: 20,
-            //                   ),
-            //                   Container(
-            //                     width: 150,
-            //                     child: TextField(
-            //                       decoration: InputDecoration(
-            //                           labelText: 'Lng', border: InputBorder.none),
-            //                       readOnly: true,
-            //                       controller: TextEditingController(
-            //                           text: filteredOurLocations[index]
-            //                               .lng
-            //                               .toString()),
-            //                     ),
-            //                   ),
-            //                 ],
-            //               )
-            //             ],
-            //           ),
-            //         ),
-            //       ),
-            //     );
-            //   },
-            // ),
-            ),
+                      )
+                  ],
+                ),
+        ),
       );
     }
   }

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'database_helper.dart';
-import 'model/target.dart';
-import 'pages/TargetScreen.dart';
-import 'pages/OurLocationsScreen.dart';
+
 import 'pages/HomeScreen.dart';
+import 'pages/OurLocationsScreen.dart';
+import 'pages/TargetScreen.dart';
 
 void main() => runApp(MyApp());
 
@@ -40,8 +39,6 @@ class _MyHomePageScreen extends State<MyHomePage> {
       OurLocationsScreen(),
       HomeScreen(),
     ];
-
-//    setNotDispose();
 
     super.initState();
   }

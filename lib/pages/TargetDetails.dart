@@ -2,8 +2,9 @@ import 'package:desktop_test_app/componants/Alert.dart';
 import 'package:desktop_test_app/model/target.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import '../database_helper.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+
+import '../database_helper.dart';
 
 class TargetDetails extends StatefulWidget {
   final Target target;
@@ -27,6 +28,7 @@ class _TargetDetails extends State<TargetDetails> {
 
   void hideMessage() async {
     await Future.delayed(Duration(seconds: 3));
+    if (!mounted) return;
     setState(() {
       showMessage = false;
     });
@@ -101,21 +103,20 @@ class _TargetDetails extends State<TargetDetails> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    // ClipRRect(
-                    //   borderRadius: BorderRadius.circular(12),
-                    //   child: SvgPicture.network(
-                    //     filteredCategories[index].imageUrl,
-                    //     fit: BoxFit.cover,
-                    //     width: 56,
-                    //     height: 56,
-                    //   ),
-                    // ),
-                    //SizedBox(width: 16),
+                    Icon(
+                      Icons.location_searching,
+                      color: activeColor,
+                      // size: 30,
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
                     Text(
                       widget.target.name,
                       style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 25,
                           color: Colors.black,
                           fontWeight: FontWeight.w500),
                     )
@@ -123,6 +124,9 @@ class _TargetDetails extends State<TargetDetails> {
                 ),
                 Row(
                   children: [
+                    SizedBox(
+                      width: 35,
+                    ),
                     Container(
                       width: 150,
                       child: TextField(
